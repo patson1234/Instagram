@@ -1,15 +1,19 @@
 import { PlusCircleIcon } from "@heroicons/react/outline"
-import { useState } from "react";
 import { useRecoilState } from "recoil";
 import { modalState,userState } from "../atoms/modalAtom";
 import { signOut } from "firebase/auth";
 import {auth} from '../firebase'
+import {Link, useHistory} from 'react-router-dom'
 export default function Header() {
+  let history = useHistory()
   const [open, setOpen] = useRecoilState(modalState)
   const [user, setUser] = useRecoilState(userState)
+  console.log(user)
   const logOut = () => {
     signOut(auth).then(() => {
+      localStorage.removeItem('sign')
       setUser([])
+      history.push('/login')
     }).catch((error) => {
       alert(error.message)
     });
@@ -20,6 +24,7 @@ export default function Header() {
       <div className="container mx-auto max-w-screen-lg h-full">
         <div className="flex justify-between h-full">
           <div className="text-gray-700 text-center flex items-center align-items cursor-pointer">
+            <Link to='/'>
             <div className="flex hidden lg:inline-grid mx-2 w-full">
               
                 <img src="https://github.com/karlhadwen/instagram/blob/master/public/images/users/logo.png?raw=true" alt="Instagram" className="mt-2 w-6/12" />
@@ -30,6 +35,7 @@ export default function Header() {
                 <img src='https://www.stanthonyshs.org/wp-content/uploads/2018/01/instagram-logo-black-transparent.png' alt="Instagram" className="" />
              
             </div>
+            </Link>
           </div>
           {user ?
             <div className="text-gray-700 text-center flex items-center align-items">
@@ -57,7 +63,7 @@ export default function Header() {
                     />
                   </svg>
                 </button>
-
+                <Link to={`/p/${user.displayName}`}>
                 <div className="flex items-center cursor-pointer">
                   
                     <img
@@ -67,7 +73,7 @@ export default function Header() {
 
                     />
                   
-                </div>
+                </div></Link>
 
               </>
             </div> :

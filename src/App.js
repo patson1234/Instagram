@@ -1,45 +1,32 @@
 import { useEffect,useState} from "react";
-import Feed from "./components/Feed";
-import Header from "./components/Header";
+
 import SignIn from "./components/Signin";
-import {auth} from './firebase'
-import {onAuthStateChanged} from 'firebase/auth'
-import { useRecoilState } from "recoil"
-import { userState } from "./atoms/modalAtom"
-import Modal from "./components/Modal";
 import Loader from "./components/Loader";
+
+import Userprofile from "./Userprofile";
+import { BrowserRouter as Router, Switch, Route,} from "react-router-dom";
+import Main from "./Main";
 function App() {
-  const [session,setSession] = useRecoilState(userState)
-  const [loading, setLoading] = useState(true);
-  useEffect(() => {
-    onAuthStateChanged(auth, (user) => {
-      if (user) {
-        setSession({
-          uid:user.uid,
-          email:user.email,
-          userImg:user.photoURL,
-          displayName:user.displayName
-        })
-        setLoading(false)
-      } 
-      else{
-        setLoading(false)
-      }
-      
-    });
-  }, []);
   
   return (
-    <div className="bg-gray-50 h-screen overflow-y-scroll">
+    <div className="bg-gray-background overflow-x-hidden">
+      <Router>
+        <Switch>
+          <Route exact path='/'>
+            <Main />
+          </Route>
+          <Route exact path='/p/:username'>
+            <Userprofile />
+          </Route>
+          <Route exact path='/login'>
+            <SignIn />
+          </Route>
+          <Route >
+           
+          </Route>
+        </Switch>
+      </Router>
 
-      {loading && <Loader />}
-      {session.length < 1 && loading === false &&
-      <SignIn /> }
-
-     {session.displayName && loading === false && <><Header />
-       <Feed />
-        <Modal /> 
-        </>}
     </div>
   );
 }

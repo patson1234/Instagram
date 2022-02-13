@@ -1,16 +1,33 @@
-import { auth, provider} from '../firebase'
+import { auth, provider } from '../firebase'
 import { signInWithPopup, GoogleAuthProvider } from "firebase/auth";
-import { userState } from "../atoms/modalAtom"
-import { useRecoilState } from "recoil"
-
+import { useHistory } from 'react-router-dom';
+import { collection, query, where, doc, setDoc, getDocs, onSnapshot } from "firebase/firestore";
+import { db } from '../firebase';
 export default function SignIn() {
-    const [session,userSession] = useRecoilState(userState)
+    let history = useHistory()
     const signIn = () => {
         signInWithPopup(auth, provider)
-            .then((result) => {   
+            .then((result) => {
                 const credential = GoogleAuthProvider.credentialFromResult(result);
+                localStorage.setItem('sign','true')
+                const q = query(collection(db, "users"), where('id', '==', `${result.user.uid}`))
+                const unsubscribe = onSnapshot(q, (querySnapshot) => {
+                    console.log(querySnapshot.docs)
+                    if (querySnapshot.docs.length !== 1) {
+                        setDoc(doc(db, 'users', result.user.uid), {
+                            username: result.user.displayName,
+                            id: result.user.uid,
+                            userImg: result.user.photoURL,
+                            email: result.user.email,
+                            followers:[],
+                            following:[]
+                        }).then(()=>history.push('/'))
+                    }else{
+                        history.push("/")
+                        console.log('signed already')
+                    }
+                })
             }).catch((error) => {
-                alert(error.message)
                 const credential = GoogleAuthProvider.credentialFromError(error);
             });
     }
